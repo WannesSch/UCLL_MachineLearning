@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+body {
+    display: flex;
+    align-items: center;
+    background-image: url('../Images/sea.jpg');
+    overflow: hidden;
+}
+
+#island {
+    position: absolute;
+    background-image: url('../Images/eiland.png');
+    translate: -50px -50px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.boat {
+    position: absolute;
+    background-image: url("../Images/boot.png");
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    object-fit: fill;
+    z-index: 9999;
+    translate: -25px -50px;
+}
+
+.sensor {
+    position: absolute;
+    width: 5px;
+    background: rgba(255, 174, 0, 575);
+    transform-origin: 50% 100%;
+    left: 22.5px;
+    z-index: 9998;
+}
+.collision {
+    background: rgba(0, 0, 0, 0.575);
+}
+.point {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgb(202, 138, 0);
+    z-index: 9999;
+    translate: -3px -3px;
+    border-radius: 100%;
+}
+.trail {
+    width: 4px;
+    height: 25px;
+    position: absolute;
+    translate: -2px -25px;
+}

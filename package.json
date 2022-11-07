@@ -1,0 +1,31 @@
+{
+  "name": "ucll_machinelearning",
+  "version": "1.0.0",
+  "description": "UCLL Machine Learning",
+  "main": "./Server/Startup.js",
+  "scripts": {
+    "prestart": "cls",
+    "start": "node ./Server/Startup.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WannesSch/UCLL_MachineLearning.git"
+  },
+  "keywords": [
+    "Machine",
+    "Learning",
+    "Car"
+  ],
+  "author": "Wannes Schillebeeckx, Brecht Saelens, Sam Geboers, Sander Raymakers, Yago Engels",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WannesSch/UCLL_MachineLearning/issues"
+  },
+  "homepage": "https://github.com/WannesSch/UCLL_MachineLearning#readme",
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  }
+}
