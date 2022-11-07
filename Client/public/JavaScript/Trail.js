@@ -5,6 +5,7 @@ import { Config } from './Data/Config.js';
 class Trail {
     constructor() {
         this.trail = [];
+        this.trailLength = 0;
         this.trailInterval = Config.trail.trailInterval;
         this.lastTrail = null;
         this.color = this.getRandomColor();
@@ -42,11 +43,12 @@ class Trail {
         if (valid) {
             let trailComponent = new TrailComponent(_x, _y, _angle);
             this.trail.push(trailComponent);
+            this.trailLength++;
         }
 
         if (this.trail.length > Config.trail.maxTrailLength) this.removeFirst();
 
-        this.update(boatId);
+        if(Config.trail.draw) this.update(boatId);
     }
 
     update(boatId) {

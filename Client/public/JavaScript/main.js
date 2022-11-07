@@ -6,28 +6,87 @@ import { NeuralNetwork , Level } from './Network.js';
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
-let sea = new Sea(windowWidth, windowHeight);
+const sea = new Sea(windowWidth, windowHeight);
+let fleet = [];
+let previousBestBoat = null;
+
+// use localstorage
+// if(localStorage.getItem("bestBrain")){
+//     for(let i=0;i<fleet.length;i++){
+//         console.log(fleet[1].brain.levels[1].biases[1]);
+//         fleet[i].brain=JSON.parse(
+//             localStorage.getItem("bestBrain"));
+//             console.log(fleet[1].brain.levels[1].biases[1]);    
+//         if(i!=0){
+//             NeuralNetwork.mutate(fleet[i].brain,0.1);
+//             console.log(fleet[1].brain.levels[1].biases[1]);
+//         }
+//     }
+// }
+
+$(document).ready(() => {
+    OnWindowLoad();
+})
 
 
-sea.initializeIslands();
+async function OnWindowLoad() {
+    let bestBrain = await getBestBrainFromServer();
+    console.log(bestBrain)
+    bestBrain = bestBrain[0]
 
-const fleet = generateFleet(Config.network.fleetCount);
-if(localStorage.getItem("bestBrain")){
-    for(let i=0;i<fleet.length;i++){
-        console.log(fleet[1].brain.levels[1].biases[1]);
-        fleet[i].brain=JSON.parse(
-            localStorage.getItem("bestBrain"));
-            console.log(fleet[1].brain.levels[1].biases[1]);    
-        if(i!=0){
-            NeuralNetwork.mutate(fleet[i].brain,0.1);
-            console.log(fleet[1].brain.levels[1].biases[1]);
+    sea.initializeIslands();
+    fleet = generateFleet(Config.network.fleetCount);
+    if (bestBrain) {
+        for(let i=0;i<fleet.length;i++){
+            // console.log(fleet[1].brain.levels[1].biases[1]);
+            fleet[i].brain=bestBrain;
+
+            // console.log(fleet[1].brain.levels[1].biases[1]);    
+
+            if(i!=0){
+                NeuralNetwork.mutate(fleet[i].brain, Config.network.mutationRate);
+                // console.log(fleet[1].brain.levels[1].biases[1]);
+            }
         }
     }
-}
-startAnimation();
-//GetBestBrain();
-//startCounting();
 
+    startAnimation();
+    startTimer();
+}
+
+function getBestBrainFromServer() {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: './GETBestBrain',
+        type: 'POST',
+        success: function (data) {
+          resolve(data)
+        },
+        error: function (error) {
+          reject(error)
+        },
+      })
+    })
+}
+
+function sendBestBrainToServer(bestBoat) {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: './SAVEBestBrain',
+        type: 'POST',
+        data: {
+            id: bestBoat.id,
+            brain: bestBoat.brain
+        },
+        success: function (data) {
+          resolve(data)
+        },
+        error: function (error) {
+          reject(error)
+        },
+      })
+    })
+}
 
 //functie voor een vloot te creeeren
 function generateFleet(N){
@@ -39,30 +98,67 @@ function generateFleet(N){
     return boats;
 }
 
-function GetBestBrain() {
-    $.post('./GETBestBrain', (data) => {
-        console.log(data)
-        if (data) {
-            //$.parseJSON(data);
-            for (let i = 0; i<fleet.length; i++) {
-                fleet[i].brain = data;
-
-                //console.log(fleet[0].brain);
-                //console.log(fleet[1].brain);
-
-                NeuralNetwork.mutate(fleet[i].brain, 0.9);
-                //console.log(fleet[1].brain);
-            }
-        }
-    })
-}
-
-
 function startAnimation() {
     for(let i = 0; i < fleet.length; i++)
         fleet[i].update();
 
     requestAnimationFrame(startAnimation);
+}
+
+function startTimer() {
+    let count = 0;
+    let timer = setInterval(() => {
+        count++;
+
+        if (count == 10) {
+            getBestBoat();
+            startTimer();
+        }
+    }, 1000);
+}
+
+function getBestBoat() {
+    let farthestDistance = 0;
+    let longestTimeAlive = 0;
+
+    let bestBoat = null;
+
+    for (let boat of fleet) {
+        let distance = Math.sqrt(Math.pow(boat.x - boat.startPoint.x, 2) + Math.pow(boat.y - boat.startPoint.y, 2));
+        if (distance < 200 || boat.x <= boat.startPoint.x && boat.y >= boat.startPoint.y + 50 && !boat.damages)  {
+            boat.farthestDistance = 0;
+            boat.timeSurvived = 0;
+        }
+
+
+        if (boat.farthestDistance >= farthestDistance && boat.timeSurvived >= longestTimeAlive) {
+            farthestDistance = boat.farthestDistance;
+            longestTimeAlive = boat.timeSurvived;
+
+            bestBoat = boat;
+        }
+    }
+
+    $(bestBoat.boatElement).css('opacity', 1);
+
+    bestBoat.sensors.color = 'rgba(14, 135, 20, 0.575)';
+    bestBoat.sensors.draw();
+    
+    if(previousBestBoat) console.log(bestBoat.id, previousBestBoat.id)
+    if (bestBoat === previousBestBoat) {
+        sendBestBrainToServer(bestBoat).then(() => {
+            window.location.reload();
+        })
+
+        return;
+    }
+    else {
+        previousBestBoat = bestBoat;
+        bestBoat.sensors.color = 'rgba(14, 135, 20, 0.575)';
+        bestBoat.sensors.draw();
+    }
+
+    if (!previousBestBoat) previousBestBoat = bestBoat;
 }
 
 document.addEventListener("click", (e) => {
@@ -73,40 +169,3 @@ document.addEventListener("click", (e) => {
     sea.endPoint= {x:xC,y:yC}
     console.log(sea.endPoint);
 })
-
-// function startCounting() {
-//     let counter = 0;
-//     setInterval(() => {
-//         if (counter == 5) {
-//             getBestBoat();
-//         }
-//         counter++;
-//     }, 1000);
-// }
-
-function getBestBoat() {
-    let farthestDistance = 0;
-    let longestTimeAlive = 0;
-
-    let bestBoat = null;
-
-    for (let boat of fleet) {
-        boat.damaged = true;
-
-        if (boat.farthestDistance >= farthestDistance) {
-            farthestDistance = boat.farthestDistance;
-            longestTimeAlive = boat.timeSurvived;
-
-            bestBoat = boat;
-        }
-    }
-
-    //save brain to server here
-    // $.post('./GETBestBrain', (data) => {
-    //     console.log(data)
-    //     if (!data || bestBoat.farthestDistance > data.farthestDistance) {
-    //         console.log(bestBoat)
-    //         $.post('./SAVEBestBrain', {boat: bestBoat}, () => {})
-    //     }
-    // })
-}

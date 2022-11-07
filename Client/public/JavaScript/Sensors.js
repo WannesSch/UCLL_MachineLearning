@@ -12,11 +12,13 @@ class Sensors {
         this.lineLength = Config.sensor.lineLength;
         this.lineSpread = Config.sensor.lineSpread;
 
+        this.color = Config.sensor.color;
+
         this.lines = [];
         this.readings = [];
     }
 
-    update(boatid){
+    update(){
         this.lines = [];
         for (let i = 0; i<this.lineCount; i++) {
             let lineAngle = lerp(
@@ -49,15 +51,18 @@ class Sensors {
             ]
 
             this.lines.push({id: i, element: null, points: points, lineAngle: lineAngle});
-            // for (let j = 0; j<points.length; j++) {
-            //     $('#point_' + this.boat.id + "_" + i + '_' + j).remove();
-            //     let point = document.createElement('div');
-            //     point.className = 'point';
-            //     point.id = 'point_' + this.boat.id + "_" + i + '_' + j;
-            //     point.style.left = `${points[j].x}px`
-            //     point.style.top = `${points[j].y}px`
-            //     document.body.append(point);
-            // }
+            if (!Config.general.drawPoints) continue; 
+            for (let j = 0; j<points.length; j++) {
+                if (j == 0) continue;
+                $('#point_' + this.boat.id + "_" + i + '_' + j).remove();
+                let point = document.createElement('div');
+                point.className = 'point';
+                point.id = 'point_' + this.boat.id + "_" + i + '_' + j;
+                point.style.background = 'red';
+                point.style.left = `${points[j].x}px`
+                point.style.top = `${points[j].y}px`
+                document.body.append(point);
+            }
         }
     }
 
@@ -85,10 +90,13 @@ class Sensors {
     }
 
     draw() {
+        console.log(this.color);
+        $(`div[id^="sensor_${this.boat.boatElement.id}_"]`).remove();
         for (let i = 0; i<this.lines.length; i++) {
             let line = document.createElement('div');
-            line.id = "sensor_" + this.lines[i].id + "_" + this.boat.boatElement.id;
+            line.id = "sensor_" + this.boat.boatElement.id + "_" + this.lines[i].id;
             line.className = "sensor";
+            line.style.background = `${this.color}`;
             line.style.height = `${this.lineLength}px`;
             line.style.transform = `rotate(${this.lines[i].lineAngle}rad)`;
             line.style.top = 50 - this.lineLength + 'px';

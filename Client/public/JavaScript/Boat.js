@@ -48,12 +48,9 @@ class Boat {
             this.#move();
             this.sensors.update();
             this.#checkForIntersection();
-            //this.trail.create(this.x, this.y, this.angle,this.id);
+            this.trail.create(this.x, this.y, this.angle,this.id);
 
-            let distance = Math.sqrt(Math.pow(this.x - this.startPoint.x, 2) + Math.pow(this.y - this.startPoint.y, 2));
-
-            if (this.y > this.startPoint.y) distance = -distance;
-            if (distance > this.farthestDistance) this.farthestDistance = distance + this.timeSurvived;
+            this.farthestDistance = this.trail.trailLength;
         }
         else {
             this.endPoint = { x: this.x, y: this.y };
@@ -70,11 +67,7 @@ class Boat {
         let _boat = this;
         boat.onclick = function(e) {
             console.log(this.id)
-            // console.log(_boat.brain)
-            // $.post('./SAVEBestBrain', {boat: _boat.brain}, () => {})
-            
-            localStorage.setItem("bestBrain",
-            JSON.stringify(_boat.brain));
+            $.post('./SAVEBestBrain', {boat: _boat.brain}, () => {})
         }
 
         this.boatElement = boat;
@@ -106,8 +99,8 @@ class Boat {
         if (this.speed != 0) {
             let flip = this.speed>0?1:-1;
 
-            if (this.controls.left) this.angle -= 0.01 * flip;
-            if (this.controls.right) this.angle += 0.01 * flip;
+            if (this.controls.left) this.angle -= Config.boat.angleIncrement * flip;
+            if (this.controls.right) this.angle += Config.boat.angleIncrement * flip;
         }
 
         this.x += Math.sin(this.angle) * this.speed;
@@ -122,7 +115,7 @@ class Boat {
         let closestIsland = this.sea.getClosestIsland(this);
         if (closestIsland == null) return;
 
-        this.#drawHitboxes(closestIsland);
+        this.#drawHitboxes();
 
         const outputsSensors = [];
         for (let sensor of this.sensors.lines) {
@@ -138,11 +131,11 @@ class Boat {
                     sensorPoint.x >= this.sea.width ||
                     sensorPoint.y >= this.sea.height
                     ) {
-                        $('#sensor_' + sensor.id + '_' + this.boatElement.id).css('background', 'rgba(0, 0, 0, 0.575)');
+                        $('#sensor_' + this.boatElement.id + '_' + sensor.id).css('background', Config.sensor.collisionColor);
                         outputsSensors[sensor.id] = 1;
                     } 
                     else {
-                        $('#sensor_' + sensor.id + '_' + this.boatElement.id).css('background', 'rgba(255, 174, 0, 0.575)');
+                        $('#sensor_' + this.boatElement.id + '_' + sensor.id).css('background', this.sensors.color);
                         outputsSensors[sensor.id] = 0;
                     }
                 }
@@ -150,12 +143,13 @@ class Boat {
 
         const outputs = NeuralNetwork.feedForward(outputsSensors,this.brain);
 
-        //uncomment to enable network
-        this.controls.forward = outputs[0];
-        this.controls.left = outputs[1];
-        this.controls.right = outputs[2];
-        this.controls.reverse = outputs[3];
-
+        if (Config.network.useNetwork) {
+            this.controls.forward = outputs[0];
+            this.controls.left = outputs[1];
+            this.controls.right = outputs[2];
+            this.controls.reverse = outputs[3];
+        }
+        
         this.checkDamage(closestIsland, outputs);
     }
 
@@ -174,11 +168,6 @@ class Boat {
             this.damaged = true;
             this.boatElement.style.backgroundImage = 'url("./Images/bootcrash.png")';
         }
-        // ||
-
-        //     this.timeSurvived == 500 && 
-        //     this.x == this.startPoint.x && 
-        //     this.y == this.startPoint.y 
     }
 
 
@@ -202,13 +191,11 @@ class Boat {
         return blocked;
     }
 
-    #drawHitboxes(closestIsland) {
+    #drawHitboxes() {
         if (!Config.general.drawHitboxes) return;
 
         for (let island of this.sea.islands) 
             $(island.islandElement).css('border', '1px solid green');
-        
-        
     }
 }
 

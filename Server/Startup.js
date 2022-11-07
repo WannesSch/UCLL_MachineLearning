@@ -24,10 +24,9 @@ app.post("/:action", function(req, res) {switch(req.param('action')) {
         res.end();
     } break;
     case "SAVEBestBrain": {
-        let data = req.body.boat;
-        console.log(data)
+        let data = req.body;
 
-        fs.writeFileSync('./Server/Data/BestBoat.json', JSON.stringify(data));
+        fs.writeFileSync('./Server/Data/BestBoat.json', JSON.stringify(data.brain));
         res.end();
     } break;
 }})

@@ -29,28 +29,26 @@ body {
     object-fit: fill;
     z-index: 9999;
     translate: -25px -50px;
+    opacity: 0.5;
 }
 
 .sensor {
     position: absolute;
     width: 5px;
-    background: rgba(255, 174, 0, 575);
     transform-origin: 50% 100%;
     left: 22.5px;
     z-index: 9998;
 }
-.collision {
-    background: rgba(0, 0, 0, 0.575);
-}
+
 .point {
     position: absolute;
     width: 6px;
     height: 6px;
-    background: rgb(202, 138, 0);
     z-index: 9999;
     translate: -3px -3px;
     border-radius: 100%;
 }
+
 .trail {
     width: 4px;
     height: 25px;
