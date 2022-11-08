@@ -32,10 +32,10 @@ $(document).ready(() => {
 async function OnWindowLoad() {
     let bestBrain = await getBestBrainFromServer();
     console.log(bestBrain)
-    bestBrain = bestBrain[0]
 
     sea.initializeIslands();
     fleet = generateFleet(Config.network.fleetCount);
+    console.log(bestBrain)
     if (bestBrain) {
         for(let i=0;i<fleet.length;i++){
             // console.log(fleet[1].brain.levels[1].biases[1]);
@@ -44,14 +44,14 @@ async function OnWindowLoad() {
             // console.log(fleet[1].brain.levels[1].biases[1]);    
 
             if(i!=0){
-                NeuralNetwork.mutate(fleet[i].brain, Config.network.mutationRate);
+                //NeuralNetwork.mutate(fleet[i].brain, Config.network.mutationRate);
                 // console.log(fleet[1].brain.levels[1].biases[1]);
             }
         }
     }
 
     startAnimation();
-    startTimer();
+    //startTimer();
 }
 
 function getBestBrainFromServer() {
@@ -149,16 +149,15 @@ function getBestBoat() {
         sendBestBrainToServer(bestBoat).then(() => {
             window.location.reload();
         })
-
         return;
     }
     else {
-        previousBestBoat = bestBoat;
-        bestBoat.sensors.color = 'rgba(14, 135, 20, 0.575)';
+        if (previousBestBoat) previousBestBoat.sensors.color = Config.sensor.color;
+        bestBoat.sensors.color = Config.sensor.bestBoatColor;
         bestBoat.sensors.draw();
     }
 
-    if (!previousBestBoat) previousBestBoat = bestBoat;
+    previousBestBoat = bestBoat;
 }
 
 document.addEventListener("click", (e) => {

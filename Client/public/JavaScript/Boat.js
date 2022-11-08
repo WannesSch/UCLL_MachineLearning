@@ -6,9 +6,6 @@ import { Sensors } from './Sensors.js';
 import { NeuralNetwork, Level} from './Network.js';
 import { Trail } from './Trail.js';
 
-let mouseX = 0;
-let mouseY = 0;
-
 let seaDiv = document.getElementById("sea");
 
 class Boat {
@@ -198,10 +195,5 @@ class Boat {
             $(island.islandElement).css('border', '1px solid green');
     }
 }
-
-document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
 
 export { Boat }
