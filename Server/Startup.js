@@ -20,6 +20,7 @@ app.post("/:action", function(req, res) {switch(req.param('action')) {
             res.send(null);
             return;
         }
+
         res.send(obj);
         res.end();
     } break;

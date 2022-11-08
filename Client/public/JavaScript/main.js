@@ -10,50 +10,39 @@ const sea = new Sea(windowWidth, windowHeight);
 let fleet = [];
 let previousBestBoat = null;
 
-// use localstorage
-// if(localStorage.getItem("bestBrain")){
-//     for(let i=0;i<fleet.length;i++){
-//         console.log(fleet[1].brain.levels[1].biases[1]);
-//         fleet[i].brain=JSON.parse(
-//             localStorage.getItem("bestBrain"));
-//             console.log(fleet[1].brain.levels[1].biases[1]);    
-//         if(i!=0){
-//             NeuralNetwork.mutate(fleet[i].brain,0.1);
-//             console.log(fleet[1].brain.levels[1].biases[1]);
-//         }
-//     }
-// }
-
 $(document).ready(() => {
     OnWindowLoad();
 })
 
-
+//wait for server response and start program
 async function OnWindowLoad() {
     let bestBrain = await getBestBrainFromServer();
-    console.log(bestBrain)
+
+    if(bestBrain) {
+        localStorage.setItem("bestBrain",
+            JSON.stringify(bestBrain));
+    }
 
     sea.initializeIslands();
     fleet = generateFleet(Config.network.fleetCount);
-    console.log(bestBrain)
-    if (bestBrain) {
+    
+    if(localStorage.getItem("bestBrain")){
         for(let i=0;i<fleet.length;i++){
-            // console.log(fleet[1].brain.levels[1].biases[1]);
-            fleet[i].brain=bestBrain;
 
-            // console.log(fleet[1].brain.levels[1].biases[1]);    
+            fleet[i].brain=JSON.parse(
+                localStorage.getItem("bestBrain"));
 
             if(i!=0){
-                //NeuralNetwork.mutate(fleet[i].brain, Config.network.mutationRate);
-                // console.log(fleet[1].brain.levels[1].biases[1]);
+                if(Config.general.useMutation) NeuralNetwork.mutate(fleet[i].brain,0.1);
             }
         }
     }
 
     startAnimation();
-    //startTimer();
+    if(Config.general.useMutation) startTimer();
 }
 
+//Retrieve bestbrain from server
 function getBestBrainFromServer() {
     return new Promise((resolve, reject) => {
       $.ajax({
@@ -69,6 +58,7 @@ function getBestBrainFromServer() {
     })
 }
 
+//Save bestbrain to server
 function sendBestBrainToServer(bestBoat) {
     return new Promise((resolve, reject) => {
       $.ajax({
@@ -88,7 +78,7 @@ function sendBestBrainToServer(bestBoat) {
     })
 }
 
-//functie voor een vloot te creeeren
+//create fleet
 function generateFleet(N){
     const boats = [];
     for(let i = 1; i <= N; i++){
@@ -98,6 +88,7 @@ function generateFleet(N){
     return boats;
 }
 
+//Run boats
 function startAnimation() {
     for(let i = 0; i < fleet.length; i++)
         fleet[i].update();
@@ -105,6 +96,7 @@ function startAnimation() {
     requestAnimationFrame(startAnimation);
 }
 
+//Start update cycle for bestbrain
 function startTimer() {
     let count = 0;
     let timer = setInterval(() => {
@@ -117,13 +109,17 @@ function startTimer() {
     }, 1000);
 }
 
+//Get the best performing boat
 function getBestBoat() {
     let farthestDistance = 0;
     let longestTimeAlive = 0;
 
     let bestBoat = null;
 
+    let allDead = true;
+
     for (let boat of fleet) {
+        if (!boat.damaged) allDead = false;
         let distance = Math.sqrt(Math.pow(boat.x - boat.startPoint.x, 2) + Math.pow(boat.y - boat.startPoint.y, 2));
         if (distance < 200 || boat.x <= boat.startPoint.x && boat.y >= boat.startPoint.y + 50 && !boat.damages)  {
             boat.farthestDistance = 0;
@@ -131,19 +127,21 @@ function getBestBoat() {
         }
 
 
-        if (boat.farthestDistance >= farthestDistance && boat.timeSurvived >= longestTimeAlive) {
+        if (boat.farthestDistance >= farthestDistance && boat.timeSurvived >= longestTimeAlive && !boat.damaged) {
             farthestDistance = boat.farthestDistance;
             longestTimeAlive = boat.timeSurvived;
 
             bestBoat = boat;
         }
     }
+    if (allDead) window.location.reload();
 
     $(bestBoat.boatElement).css('opacity', 1);
 
     bestBoat.sensors.color = 'rgba(14, 135, 20, 0.575)';
     bestBoat.sensors.draw();
     
+    if(previousBestBoat && bestBoat == null) window.location.reload();
     if(previousBestBoat) console.log(bestBoat.id, previousBestBoat.id)
     if (bestBoat === previousBestBoat) {
         sendBestBrainToServer(bestBoat).then(() => {
@@ -159,12 +157,3 @@ function getBestBoat() {
 
     previousBestBoat = bestBoat;
 }
-
-document.addEventListener("click", (e) => {
-    let xC = e.clientX;
-    let yC = e.clientY;
-    console.log("EndPoint selected: (" + xC + "," + yC + ")");
-
-    sea.endPoint= {x:xC,y:yC}
-    console.log(sea.endPoint);
-})

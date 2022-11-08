@@ -2,7 +2,8 @@
 const Config = {
     general: {
         drawHitboxes: false,
-        drawPoints: false //Creates alot of DOM elements Expect some lagg
+        drawPoints: false, //Creates alot of DOM elements Expect some lagg
+        useMutation: false
     },
     boat: {
         width: 50,
@@ -30,12 +31,12 @@ const Config = {
         pointColor: "rgb(115, 25, 25)"
     },
     network: {
-        fleetCount: 2,
+        fleetCount: 100,
         mutationRate: 0.1,
         useNetwork: true
     },
     trail: {
-        draw: true, //Creates alot of DOM elements Expect some lagg
+        draw: false, //Creates alot of DOM elements Expect some lagg
         trailInterval: 50,
         maxTrailLength: 10
     }

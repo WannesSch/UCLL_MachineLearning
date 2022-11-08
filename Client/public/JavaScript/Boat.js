@@ -63,7 +63,6 @@ class Boat {
 
         let _boat = this;
         boat.onclick = function(e) {
-            console.log(this.id)
             $.post('./SAVEBestBrain', {boat: _boat.brain}, () => {})
         }
 
@@ -138,7 +137,7 @@ class Boat {
                 }
         }
 
-        const outputs = NeuralNetwork.feedForward(outputsSensors,this.brain);
+        const outputs = NeuralNetwork.feedForward(outputsSensors, this.brain);
 
         if (Config.network.useNetwork) {
             this.controls.forward = outputs[0];
