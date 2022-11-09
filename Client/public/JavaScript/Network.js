@@ -1,6 +1,6 @@
 import { lerp } from "./Utils.js";
 
-//Network module
+//https://github.com/gniziemazity/Self-driving-car/blob/main/8.%20Optimizing%20neural%20networks/network.js
 class NeuralNetwork{
     constructor(neuronCounts){
         this.levels = [];
