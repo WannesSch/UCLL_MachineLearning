@@ -1,7 +1,7 @@
 # UCLL_MachineLearning
-Use 'npm start' to start project
+# Use 'npm start' to start project
 
-Use 'Client/public/JavaScript/Data/Config.js' to change params\n
+Use 'Client/public/JavaScript/Data/Config.js' to change params
 Important: 
     - Using points and boat trails will slow down the application -> use a fleetcount of < 5
     - islandCounts over 30 will work but wont add extra islands
