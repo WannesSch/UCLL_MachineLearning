@@ -1,7 +1,7 @@
 # UCLL_MachineLearning
 Use 'npm start' to start project
 
-```md
+### Info
 Use 'Client/public/JavaScript/Data/Config.js' to change params
 Important: 
     - Using points and boat trails will slow down the application -> use a fleetcount of < 5
@@ -12,4 +12,3 @@ Important:
     - useMutation (enable in config), when enabled every gen will mutate. Every 10 seconds the program will calculate the best generation based on time alive & distance traveled, if the previousbestbrain is the same as the new calculated bestbrain it will update the server and reload the page. If boats gets stuck it will also refresh after 10 seconds. Reloading manually will also get the boats unstuck
 
 UCLL project by: - Wannes Schillebeeckx - Brecht Saelens (test) - Sam Geboers - Sander Raymakers - Yago Engels
-```
